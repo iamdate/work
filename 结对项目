@@ -1,0 +1,393 @@
+#include<stdio.h>
+#include<stdlib.h> 
+#include<time.h>
+#include <string.h>
+#include<math.h>
+#define n1 50
+#pragma warning(disable:4996)
+typedef struct
+{
+	char a[n1];
+	int size;//��ʾջ�к��е�Ԫ������
+} stack;
+char pop(stack *p)
+{
+	if (p->size == 0)
+		printf("��ջ");
+	else
+	{
+		--(p->size);
+		return p->a[p->size];
+	}
+}
+char top(stack *p)
+{
+	if (p->size == 0)
+		return -1;//�׳�/0�ַ�������
+	else
+	{
+		return p->a[p->size - 1];
+	}
+}
+int empty(stack *p)
+{
+	return p->size == 0;
+}
+void push(stack *p, char b)
+{
+	p->a[p->size] = b;
+	++p->size;
+}
+int getGcd(int a,int b)//gongyueshu
+{
+ int t,c;
+    if(a<b)  //�Ƚϴ�С��ʹ��a�д洢������b�д洢С��
+    {
+        t=a;
+        a=b;
+        b=t;
+    }
+   while(b!=0)
+    {
+        c=a%b;
+        a=b;
+        b=c;
+    }
+    return a;
+}
+int compare(char a)//���ڱȽ����ȼ�
+{
+	int i;
+	switch (a)
+	{
+	case '+':
+		i = 1;
+		break;
+	case '-':
+		i = 1;
+		break;
+	case '*':
+		i = 2;
+		break;
+	case '/':
+		i = 2;
+		break;
+	default:
+		i = 0;
+		break;
+	}
+	return i;
+}
+void reckon(float *a, float b, char c)//���ڽ������ֺϲ�,ע��ǰ������ִ���ַ 
+{	//����ʽ���㶨��
+	int t;
+	if (c == '-')
+	{	if(*a<b)//�Ǹ� 
+		{	 t=*a;*a=b;b=t;}
+		(*a)-=b;
+	}
+	else if (c == '+')
+	{
+		(*a) += b;
+	}
+	else if (c == '*')
+	{
+		(*a) *= b;
+	}
+	else 	
+		if(b!=0)
+			(*a) /= b;
+   			
+}
+void qiuzhi(char *bds)//��ת����ֵ 
+{	FILE *fp;
+	int i = 0;
+	stack *ysf = (stack*)malloc(sizeof(stack));//Ϊ����ʽ����һ��stack
+	ysf->size = 0;
+	float num[50];//������ֵ������
+	int numpos = 0;//������ֵ������λ��//ps��Ϊnum���ջ�õĲ����ǳ����٣���stackû�з���������û�в���ջ
+	printf("��׺����ʽΪ:");
+	while (bds[i] != '=')
+	{
+		if (bds[i] == '\0')
+		{
+			printf("����ʽӦ����=");
+			return;
+		}
+		if (bds[i] <= '9'&&bds[i] >= '0')//Ϊ���ֵ������ת��Ϊ1��������234
+		{
+			num[++numpos] = 0;
+			while (bds[i] <= '9'&&bds[i] >= '0')
+			{
+				num[numpos] *= 10;
+				num[numpos] += (bds[i] - '0');
+				++i;
+			}
+			if (bds[i] == '.')
+			{
+				double f_car = 0.1;//�������
+				++i;
+				while (bds[i] <= '9'&&bds[i] >= '0')
+				{
+					num[numpos] += ((bds[i] - '0')*f_car);
+					f_car *= 0.1;
+					++i;
+				}
+			}//����С����
+		}
+		else
+		{
+			if (empty(ysf))
+				push(ysf, bds[i]);
+			else
+			{
+				if (bds[i] == '(')
+					push(ysf, bds[i]);
+				else if (bds[i] == ')')
+				{
+					while (top(ysf) != '(')
+					{
+						reckon(&num[numpos - 1], num[numpos], top(ysf));
+						printf("%c", pop(ysf));
+						--numpos;
+					}
+					pop(ysf);//����������
+				}
+				else
+				{
+					while (compare(bds[i])<=compare(top(ysf)))
+					{
+						reckon(&num[numpos - 1], num[numpos], top(ysf));
+						printf("%c", pop(ysf));
+						--numpos;
+					}
+					push(ysf, bds[i]);
+				}
+			}
+			++i;
+		}
+	}
+	while (!empty(ysf))
+	{
+		reckon(&num[numpos - 1], num[numpos], top(ysf));
+		printf("%c", pop(ysf));
+		--numpos;
+	}
+	fopen("/��ϰ����/answer.txt","w+");
+	printf("\n������Ϊ:%.2f\n", num[1]);
+	fprintf(fp,"%.2f\n",num[1]);
+}
+
+
+void qiuzhi1(int a,int b,int c,int d,char s)
+   {int x,y,t,m;
+   	float p,q;//�м��� 
+   	int re1,re2,u;//���ӷ�ĸ 
+   	
+    x=getGcd(a,b);//��a,bԼ��
+    a/=x;
+    b/=x;
+    y=getGcd(c,d);//��c,dԼ��
+    c/=y;
+    d/=y;
+   FILE *fp=fopen("/��ϰ����/object.txt","w+");
+   FILE *fx=fopen("/��ϰ����/answer.txt","w+");
+   
+   switch(s)//ѡȡ�����
+   {
+   case '+':
+     re1=a*d+c*b;
+     re2=b*d;
+     t=getGcd(re1,re2);
+     re1/=t;
+     re2/=t;
+     printf("%d/%d + %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+     fprintf(fp, "%d/%d + %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+     fprintf(fx, "%d/%d \n",re1,re2);
+     break;
+   case '-':
+       p=a/b;
+       q=c/d;
+       if(p<q)//�жϽ����Ϊ��
+       {
+           u=a;
+           a=c;
+           c=u;
+           u=b;
+           b=d;
+           d=u;
+       }
+       re1=a*d-c*b;//������ӵ�����
+        re2=b*d;
+        t=getGcd(re1,re2);//Լ��
+     re1/=t;
+     re2/=t;
+        printf("%d/%d - %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+        fprintf(fp, "%d/%d - %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+        fprintf(fx, "%d/%d\n",re1,re2);
+
+     break;
+   case '*':
+       re1=a*c;
+       re2=b*d;
+        t=getGcd(re1,re2);
+     re1/=t;
+     re2/=t;
+     if(a==0||c==0)//�з���Ϊ0ʱ
+        {
+		printf("%d/%d * %d/%d=0",a,b,c,d);
+         fprintf(fp, "%d/%d * %d/%d=0",a,b,c,d);
+         fprintf(fx, "0 \n");
+     }
+     else
+        printf("%d/%d * %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+        fprintf(fp, "%d/%d * %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+        fprintf(fx, "%d/%d\n",re1,re2);
+        
+     break;
+   case '/':
+       
+       re1=a*d;
+       re2=b*c;
+        t=getGcd(re1,re2);
+     re1/=t;
+     re2/=t;
+     if(a==0)
+        {printf("%d/%d / %d/%d=0",a,b,c,d);//���Ϊ0
+        fprintf(fp, "%d/%d / %d/%d=0",a,b,c,d);
+        fprintf(fx, "0");
+    }
+     else{
+        printf("%d/%d / %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+        fprintf(fp, "%d/%d / %d/%d=%d/%d\n",a,b,c,d,re1,re2);
+        fprintf(fx, "%d/%d\n",re1,re2);
+          }
+        
+    
+}
+
+}
+void creat2(int num,int m,int n)
+{
+
+	char k[]={'+','-','*','/'};
+		int j; 
+   	float p,q;
+    int s,w,t,x,y,u;
+    int a,b,c,d,re1,re2;//���ӷ�ĸ�ʹ𰸵ķ��ӷ�ĸ
+    srand(time(NULL));
+    
+    w=sizeof(k);
+    for(int i=0;i<num;i++) 
+   {
+	a=rand()%m;
+    c=rand()%m;
+    b=rand()%n+2;
+    d=rand()%n+2;//��ĸ��Ϊ0��1
+    j=rand()%w;//��������ѡȡ
+   	s=k[j];
+  	qiuzhi1(a,b,c,d,s);
+  }
+   }
+   
+   
+void creat1(int num,int r)
+{
+	char a[]={'+','-','*','/'};
+	int X,c,t;
+	int i,j,b,count;
+	int x,y,x1,y1,z,e;
+	int n=sizeof(a);
+	srand(time(NULL));
+	
+	FILE *fp = NULL;//���ļ� 
+ 	fp = fopen("/��ϰ����/object.txt", "w+");
+ 	
+	for(j=0;j<num;j++)
+	{ x=rand()%r;
+	  y=rand()%r;
+	  x1=rand()%r;
+	  y1=rand()%r;
+	  z=rand()%r;
+	  X=rand()%4;
+	  i=rand()%n;
+	  b=rand()%n;
+	  c=rand()%n;
+	  x!=y;
+	  for(int i=0;i<100;i++)
+	 { switch(X)//���Ʒ����� 
+		{	case 0:
+			 printf("��%d�⣺%d%c%d= \n",j+1,x,a[i],y);
+			fprintf(fp, "%d%c%d= \n",x,a[i],y);
+			
+			break;
+			case 1:
+				printf("��%d�⣺%d%c%d%c%d=  \n",j+1,x,a[i],y,a[b],z);
+				fprintf(fp, "%d%c%d%c%d=  \n",x,a[i],y,a[b],z);
+				break;
+			case 2:
+				fprintf(fp, "%d%c%d%c%d%c%d= \n",x,a[i],y,a[b],x1,a[c],z);
+				printf("��%d�⣺%d%c%d%c%d%c%d= \n",j+1,x,a[i],y,a[b],x1,a[c],z);
+				break;
+			
+		}
+		
+	}
+}
+	fclose(fp);
+	
+}
+void save()
+{	stack *p;
+	char bds[50];
+	FILE *fx;//��ȡ�ļ� 
+	int line,i;
+	if((fx = fopen("/��ϰ����/test.txt","r")) == NULL)
+ 	{
+ 	printf("error\n");
+ 	exit (1) ;
+ 	}	
+ 	char buf[1024];
+ 	for (i = 0; i < 1024; i++) 
+		{	while(fgets(bds,50,fx) != NULL)//����ļ�
+ {
+ 		
+ 			line = strlen(bds);
+ 				bds[line-1] = '\0';  /*ȥ�����з�*/
+ 					printf("%s  \n",bds);
+					qiuzhi(bds);
+	 				
+		 } 
+		 fclose (fx);
+	 } 
+	 } 
+	
+
+
+int main()
+
+{		
+		int num1,num2,m,n,r,type;
+		printf("��ѡ��������ͣ�1or2");
+		scanf("%d\n",&type);
+		if(type==1)
+		{	printf("������������Ŀ����: ");
+	    	scanf("%d \n",&num1);
+	    	printf("��������ӷ�ĸȡֵ��Χ: ");
+	    	scanf("%d %d",&m,&n);
+	    	creat2(num1,m,n);
+		 } 
+		 else if(type==2)
+		 {
+		  
+			printf("������������Ŀ����: ");
+		    scanf("%d \n",&num2);
+		    printf("������ȡֵ��Χ: ");
+		    scanf("%d %d",&r);
+		    creat1(num2,r);
+		    save();//����� 
+		}
+		return 0;
+}
+
+
